@@ -821,3 +821,20 @@ h1 {
 .table-note {
     font-size: 0.8rem;
 }
+
+/* New Game wipe: filled tiles flip back to blank, one diagonal at a time. */
+#game-board.clearing .letter-box.filled,
+#game-board.clearing .letter-box.revealed {
+    animation: wipe 0.4s ease-in-out both;
+}
+
+@keyframes wipe {
+    0% { transform: rotateX(0deg); }
+    50% { transform: rotateX(90deg); }
+    50%, 100% {
+        background-color: transparent;
+        border-color: var(--border);
+        color: transparent;
+    }
+    100% { transform: rotateX(0deg); }
+}

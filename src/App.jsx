@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import Board, { FLIP_STAGGER_MS } from './components/Board.jsx';
+import Board, { FLIP_STAGGER_MS, WIPE_MS } from './components/Board.jsx';
 import Keyboard from './components/Keyboard.jsx';
 import StatsModal from './components/StatsModal.jsx';
 import RulesModal from './components/RulesModal.jsx';
@@ -27,6 +27,8 @@ export default function App() {
   const [modal, setModal] = useState(null); // 'stats' | 'rules' | null
   const [shake, setShake] = useState(null); // { row, n } while a row is shaking
   const [revealedAt, setRevealedAt] = useState(null);
+  const [clearing, setClearing] = useState(false);
+  const clearTimer = useRef(null);
   const savedGameId = useRef(null);
   const [theme, toggleTheme] = useTheme();
 
@@ -71,17 +73,35 @@ export default function App() {
     });
   }, [playing, game]);
 
-  const newGame = useCallback(() => {
+  const startNewGame = useCallback(() => {
     const t = Date.now();
     setNow(t);
     dispatch({ type: 'NEW_GAME', answer: randomAnswer(), now: t });
   }, []);
 
+  // Wipe the board before starting over, unless it's already empty.
+  const boardEmpty = game.guesses.length === 0 && game.current === '';
+  const newGame = useCallback(() => {
+    if (clearTimer.current) return;
+    if (boardEmpty || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      startNewGame();
+      return;
+    }
+    setClearing(true);
+    clearTimer.current = setTimeout(() => {
+      clearTimer.current = null;
+      startNewGame();
+      setClearing(false);
+    }, WIPE_MS);
+  }, [boardEmpty, startNewGame]);
+
+  useEffect(() => () => clearTimeout(clearTimer.current), []);
+
   const current = game.current;
   const guessCount = game.guesses.length;
   const handleKey = useCallback(
     (key) => {
-      if (!playing) return;
+      if (!playing || clearing) return;
       if (key === 'Enter') {
         if (current.length < 5 || !isValidWord(current)) {
           setShake((s) => ({ row: guessCount, n: (s?.n ?? 0) + 1 }));
@@ -95,7 +115,7 @@ export default function App() {
         dispatch({ type: 'TYPE', letter: key, now: t });
       }
     },
-    [playing, current, guessCount],
+    [playing, clearing, current, guessCount],
   );
 
   useEffect(() => {
@@ -159,7 +179,8 @@ export default function App() {
           current={game.current}
           shake={shake}
           onShakeEnd={clearShake}
-          celebrate={won && !revealing}
+          celebrate={won && !revealing && !clearing}
+          clearing={clearing}
         />
         <div id="message-area" className={message.type} role="status" aria-live="polite">
           {message.text && <span>{message.text}</span>}

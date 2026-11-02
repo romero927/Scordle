@@ -1,8 +1,12 @@
 import { WORD_LENGTH, MAX_GUESSES } from '../game/logic.js';
 
 export const FLIP_STAGGER_MS = 300;
+// New Game wipe: tiles flip back to blank in a diagonal sweep from the top-left.
+const WIPE_STAGGER_MS = 40;
+const WIPE_FLIP_MS = 400;
+export const WIPE_MS = (MAX_GUESSES - 1 + WORD_LENGTH - 1) * WIPE_STAGGER_MS + WIPE_FLIP_MS;
 
-export default function Board({ guesses, current, shake, onShakeEnd, celebrate }) {
+export default function Board({ guesses, current, shake, onShakeEnd, celebrate, clearing }) {
   const rows = [];
   for (let r = 0; r < MAX_GUESSES; r++) {
     const guess = guesses[r];
@@ -20,7 +24,13 @@ export default function Board({ guesses, current, shake, onShakeEnd, celebrate }
         <div
           key={i}
           className={className}
-          style={guess ? { animationDelay: `${i * (winRow ? 100 : FLIP_STAGGER_MS)}ms` } : undefined}
+          style={
+            clearing
+              ? { animationDelay: `${(r + i) * WIPE_STAGGER_MS}ms` }
+              : guess
+                ? { animationDelay: `${i * (winRow ? 100 : FLIP_STAGGER_MS)}ms` }
+                : undefined
+          }
         >
           {letter}
         </div>,
@@ -40,5 +50,5 @@ export default function Board({ guesses, current, shake, onShakeEnd, celebrate }
       </div>,
     );
   }
-  return <div id="game-board">{rows}</div>;
+  return <div id="game-board" className={clearing ? 'clearing' : undefined}>{rows}</div>;
 }
