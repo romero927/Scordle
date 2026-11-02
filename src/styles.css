@@ -1,0 +1,646 @@
+:root {
+    --background-color: #f0f0f0;
+    --game-background: #ffffff;
+    --text-color: #1a1a1a;
+    --tile-border-color: #d3d6da;
+    --key-background: #d3d6da;
+    --correct-color: #6aaa64;
+    --present-color: #c9b458;
+    --absent-color: #787c7e;
+}
+
+html {
+    overscroll-behavior-y: contain;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    display: flex;
+    min-height: 100dvh;
+    font-size: 16px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+    display: flex;
+    width: 100%;
+}
+
+.game-wrapper {
+    background-color: var(--game-background);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    max-width: 500px;
+    width: 100%;
+    /* auto margins center the game, but let it scroll instead of clipping when the window is short */
+    margin: auto;
+    touch-action: manipulation;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: bold;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#game-board {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    gap: 5px;
+    margin-bottom: 20px;
+    max-width: 350px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.word-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+}
+
+.letter-box {
+    aspect-ratio: 1;
+    border: 2px solid var(--tile-border-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+}
+
+.key {
+    flex: 1;
+    height: 58px;
+    min-width: 43px;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--key-background);
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: var(--text-color);
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    touch-action: manipulation;
+}
+
+.key.wide {
+    flex: 1.5;
+    font-size: 0.8rem;
+}
+
+.correct {
+    background-color: var(--correct-color);
+    border-color: var(--correct-color);
+    color: white;
+}
+
+.present {
+    background-color: var(--present-color);
+    border-color: var(--present-color);
+    color: white;
+}
+
+.absent {
+    background-color: var(--absent-color);
+    border-color: var(--absent-color);
+    color: white;
+}
+
+#new-game-btn, #stats-button, #scoring-rules-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#new-game-btn {
+    background-color: var(--correct-color);
+}
+
+#stats-button {
+    background-color: #6aaa64;
+}
+
+#scoring-rules-btn {
+    background-color: #4a90e2;
+}
+
+#new-game-btn:hover, #stats-button:hover {
+    background-color: #5e955b;
+}
+
+#scoring-rules-btn:hover {
+    background-color: #3a7bc8;
+}
+
+#message-area {
+    min-height: 40px;
+    text-align: center;
+    margin: 10px 0;
+    font-size: 0.9rem;
+    color: #333;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#message-area:empty {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+#message-area:not(:empty) {
+    border-left: 4px solid #4a90e2;
+}
+
+#message-area.error {
+    color: #d63031;
+    background-color: #ffe6e6;
+    border-left-color: #d63031;
+}
+
+#message-area.success {
+    color: #27ae60;
+    background-color: #e6ffe6;
+    border-left-color: #27ae60;
+}
+
+/* Tiles flip one at a time; the color switches at the halfway point. */
+.letter-box.filled {
+    border-color: #878a8c;
+    animation: pop 0.1s ease;
+}
+
+.letter-box.revealed {
+    --reveal-color: var(--absent-color);
+    animation: flip 0.5s ease both;
+}
+
+.letter-box.revealed.correct { --reveal-color: var(--correct-color); }
+.letter-box.revealed.present { --reveal-color: var(--present-color); }
+
+@keyframes flip {
+    0%, 49.9% {
+        background-color: transparent;
+        border-color: #878a8c;
+        color: var(--text-color);
+    }
+    0% { transform: rotateX(0deg); }
+    50% { transform: rotateX(90deg); }
+    50%, 100% {
+        background-color: var(--reveal-color);
+        border-color: var(--reveal-color);
+        color: white;
+    }
+    100% { transform: rotateX(0deg); }
+}
+
+@keyframes pop {
+    50% { transform: scale(1.08); }
+}
+
+.word-row.shake {
+    animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(4px); }
+    30%, 50%, 70% { transform: translateX(-6px); }
+    40%, 60% { transform: translateX(6px); }
+}
+
+#timer, #score {
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+#timer.low {
+    color: #d63031;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .letter-box.filled, .word-row.shake, .modal-content {
+        animation: none;
+    }
+    .letter-box.revealed {
+        animation-duration: 1ms;
+    }
+}
+
+.modal {
+    display: block;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+
+.modal-content {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: slide-in 0.3s ease-out;
+    margin: 20px auto;
+    max-height: calc(100% - 40px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.modal-body {
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1;
+    padding-right: 10px;
+}
+
+#stats-container p, #scoring-rules-content p {
+    margin: 10px 0;
+    font-size: 1rem;
+    color: #666;
+}
+
+.close {
+    background: none;
+    border: none;
+    padding: 0;
+    line-height: 1;
+    color: #aaa;
+    font-size: 30px;
+    font-weight: bold;
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+@keyframes slide-in {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.stats-summary {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 1;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.stats-table-container {
+    overflow-x: auto;
+}
+
+.stats-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 20px 0;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.stats-table thead {
+    position: sticky;
+    top: 0;
+    background-color: #6aaa64;
+    z-index: 1;
+}
+
+.stats-table th, .stats-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.stats-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.stats-table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    background-color: #6aaa64;
+    color: white;
+    font-weight: bold;
+}
+
+.stats-table td {
+    color: #333;
+}
+
+.stats-table p {
+    font-weight: bold;
+}
+
+.stats-table .best-game {
+    background-color: rgba(106, 170, 100, 0.2);  /* Light green */
+}
+
+.stats-table .worst-game {
+    background-color: rgba(220, 20, 60, 0.2);  /* Light crimson */
+}
+
+.stats-table .best-game td,
+.stats-table .worst-game td {
+    font-weight: bold;
+}
+
+.stats-table .best-game::after,
+.stats-table .worst-game::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 4px;
+    height: 100%;
+}
+
+.stats-table .best-game::after {
+    background-color: #6aaa64;  /* Green */
+}
+
+.stats-table .worst-game::after {
+    background-color: #dc143c;  /* Crimson */
+}
+
+.stats-table tr {
+    position: relative;
+}
+
+#scoring-rules-content {
+    text-align: left;
+    padding: 0 20px;
+}
+
+#scoring-rules-content ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+#scoring-rules-content li {
+    margin-bottom: 10px;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.stat-item {
+    text-align: center;
+    flex: 1;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+}
+
+h3 {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 0;
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    .game-wrapper {
+        padding: 10px 8px max(10px, env(safe-area-inset-bottom));
+        height: 100dvh;
+        max-width: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    header {
+        margin-bottom: 5px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .button-container {
+        margin-bottom: 5px;
+    }
+
+    /* Size the tiles to whatever space is left between the buttons and the keyboard. */
+    #game-board {
+        flex: 1 1 0;
+        min-height: 0;
+        max-width: none;
+        margin: 0;
+        padding: 5px 0;
+        container-type: size;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .word-row {
+        width: min(100cqw, 350px, (100cqh - 25px) / 6 * 5 + 20px);
+    }
+
+    .letter-box {
+        font-size: 1.2rem;
+    }
+
+    #keyboard {
+        margin-top: 5px;
+    }
+
+    .key {
+        font-size: 0.85rem;
+        height: 52px;
+        min-width: 20px;
+    }
+
+    .key.wide {
+        font-size: 0.6rem;
+    }
+
+    #new-game-btn, #stats-button, #scoring-rules-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+
+    #message-area {
+        font-size: 0.8rem;
+        min-height: 30px;
+        margin: 5px 0;
+        padding: 8px;
+    }
+
+    .modal-content {
+        width: 95%;
+        height: 100%;
+        max-height: none;
+        margin: 0;
+        border-radius: 0;
+        padding: 15px;
+    }
+
+    .modal-body {
+        padding-right: 5px;
+    }
+
+    .stats-summary {
+        padding-bottom: 5px;
+        margin-bottom: 5px;
+    }
+
+    .stats-row {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .stat-item {
+        width: 48%;
+        margin-bottom: 10px;
+    }
+
+    .stat-label {
+        font-size: 0.8em;
+    }
+
+    .stat-value {
+        font-size: 1em;
+    }
+
+    .stats-table {
+        font-size: 0.7rem;
+    }
+
+    .stats-table th, .stats-table td {
+        padding: 4px 2px;
+    }
+
+    .stats-table th {
+        white-space: nowrap;
+    }
+
+    h3 {
+        font-size: 1.2em;
+        margin-top: 15px;
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 350px) {
+    .stat-item {
+        width: 100%;
+    }
+
+    .stats-table {
+        font-size: 0.6rem;
+    }
+}
+
+@media (max-width: 600px) and (max-height: 640px) {
+    .key {
+        height: 42px;
+    }
+}
