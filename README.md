@@ -17,7 +17,7 @@ Live: [https://kgromero-Scordle.fly.dev/](https://kgromero-Scordle.fly.dev/)
 
 ## Tech
 
-React 19 + Vite. Everything runs in the browser; there is no backend. In production the built site is served by nginx in a Docker container on Fly.io.
+React-style components on Preact (via `preact/compat`, about 7 KB) + Vite. Everything runs in the browser; there is no backend. In production the built site is served by nginx in a Docker container on Fly.io.
 
 ## Development
 
@@ -33,6 +33,7 @@ npm run build    # build the static site into dist/
 - `src/game/` – game rules (`logic.js`), game state (`reducer.js`), word lists (`words.js`), saved history (`history.js`)
 - `src/components/` – board, keyboard and popups
 - `src/words/` – answer and valid-guess word lists
+- `public/` – icons and web app manifest (`icon-source.svg` is the editable icon design)
 
 ## Deployment
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 
 const KEY = 'scordle.theme';
 const media = () => window.matchMedia('(prefers-color-scheme: dark)');
@@ -21,7 +21,7 @@ function apply(theme) {
 export function useTheme() {
   const [theme, setTheme] = useState(() => stored() ?? (media().matches ? 'dark' : 'light'));
 
-  useEffect(() => apply(theme), [theme]);
+  useLayoutEffect(() => apply(theme), [theme]);
 
   useEffect(() => {
     if (stored()) return;
