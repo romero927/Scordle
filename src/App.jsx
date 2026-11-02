@@ -187,6 +187,12 @@ export default function App() {
           {showResults && <Breakdown breakdown={game.breakdown} total={game.score} />}
         </div>
         <Keyboard states={keyStates(revealing ? game.guesses.slice(0, -1) : game.guesses)} onKey={handleKey} />
+        <footer className="credit">
+          Made by{' '}
+          <a href="https://kgromero.com" target="_blank" rel="noopener">
+            Kyle Romero
+          </a>
+        </footer>
       </div>
       {modal === 'stats' && <StatsModal onClose={closeModal} />}
       {modal === 'rules' && <RulesModal onClose={closeModal} />}

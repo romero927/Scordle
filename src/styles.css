@@ -425,6 +425,28 @@ h1 {
     color: #8b8b8f;
 }
 
+/* ---------- Footer ---------- */
+
+.credit {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.credit a {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 2px;
+    transition: color 0.2s ease;
+}
+
+.credit a:hover {
+    color: var(--text);
+}
+
 /* ---------- Popups ---------- */
 
 .modal {
@@ -773,6 +795,11 @@ h1 {
 
     .key.wide {
         font-size: 0.65rem;
+    }
+
+    .credit {
+        margin-top: 6px;
+        font-size: 0.7rem;
     }
 
     .modal-content {
