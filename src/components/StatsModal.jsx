@@ -30,7 +30,7 @@ export default function StatsModal({ onClose }) {
           </div>
         </div>
         <h3>Game History</h3>
-        {s.total > 0 && <p className="table-note">Score shows letters + win bonus + time bonus for newer games.</p>}
+        {s.total > 0 && <p className="table-note">Score shows letters + win bonus + time bonus.</p>}
         {s.total === 0 ? (
           <p>No games played yet.</p>
         ) : (
