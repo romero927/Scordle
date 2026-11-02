@@ -44,7 +44,7 @@ function write(history) {
 
 export function summarize(history) {
   const games = [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
-  let wins = 0, totalScore = 0, totalTime = 0, winGuesses = 0;
+  let wins = 0, totalScore = 0, totalTime = 0, winGuesses = 0, bestScore = 0;
   let best = null, worst = null;
 
   for (const g of games) {
@@ -53,6 +53,7 @@ export function summarize(history) {
       winGuesses += g.guesses;
     }
     totalScore += g.score;
+    bestScore = Math.max(bestScore, g.score);
     totalTime += g.time;
     if (!best || g.score > best.score || (g.score === best.score && g.time < best.time)) best = g;
     if (!worst || g.score < worst.score || (g.score === worst.score && g.time > worst.time)) worst = g;
@@ -70,5 +71,6 @@ export function summarize(history) {
     avgScore: total ? Math.round(totalScore / total) : 0,
     avgTime: total ? Math.round(totalTime / total) : 0,
     avgGuesses: wins ? (winGuesses / wins).toFixed(1) : 'N/A',
+    bestScore,
   };
 }

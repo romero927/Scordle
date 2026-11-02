@@ -9,8 +9,10 @@ Live: [https://kgromero-Scordle.fly.dev/](https://kgromero-Scordle.fly.dev/)
 - Random word from a curated answer list, checked against a 13,000-word dictionary
 - Color feedback on each letter, with a flip animation and an on-screen keyboard
 - Works with a physical keyboard or touch
-- 5-minute countdown, scoring, and win/time bonuses (see the in-game Rules)
+- 5-minute countdown that starts when you type your first letter
+- Scoring with win and time bonuses, and a score breakdown at the end of each game (see the in-game Rules)
 - Stats and full game history, saved in the browser
+- Light and dark themes (follows your system setting until you pick one)
 - Responsive layout for phones and desktop
 
 ## Tech

@@ -41,7 +41,7 @@ describe('scoring', () => {
 describe('reducer', () => {
   const valid = () => true;
   const typeWord = (state, word) =>
-    [...word].reduce((s, letter) => gameReducer(s, { type: 'TYPE', letter }), state);
+    [...word].reduce((s, letter) => gameReducer(s, { type: 'TYPE', letter, now: 0 }), state);
 
   it('wins with bonuses', () => {
     let s = newGameState('CRANE', 0);
@@ -49,6 +49,9 @@ describe('reducer', () => {
     s = gameReducer(s, { type: 'SUBMIT', now: 10_000, isValidWord: valid });
     expect(s.status).toBe('won');
     expect(s.score).toBe(5 * 120 + 500 + 290);
+    expect(s.breakdown).toEqual({ letters: 600, win: 500, time: 290 });
+    expect(s.lastPoints).toBe(1390);
+    expect(s.message.text).toBe('You got it in 1 guess!');
     expect(s.guesses).toHaveLength(1);
   });
 
@@ -78,8 +81,26 @@ describe('reducer', () => {
     expect(typeWord(newGameState('CRANE', 0), 'ABCDEFG').current).toBe('ABCDE');
   });
 
+  it('starts the clock on the first letter', () => {
+    let s = newGameState('CRANE', 0);
+    expect(s.startTime).toBe(null);
+    expect(gameReducer(s, { type: 'TIMEOUT', now: 300_000 })).toBe(s);
+    s = gameReducer(s, { type: 'TYPE', letter: 'C', now: 5000 });
+    expect(s.startTime).toBe(5000);
+    s = gameReducer(s, { type: 'TYPE', letter: 'R', now: 9000 });
+    expect(s.startTime).toBe(5000);
+  });
+
+  it('records points from the latest guess', () => {
+    let s = typeWord(newGameState('CIGAR', 0), 'CRANE');
+    s = gameReducer(s, { type: 'SUBMIT', now: 1000, isValidWord: () => true });
+    expect(s.lastPoints).toBe(180);
+    expect(s.score).toBe(180);
+  });
+
   it('times out', () => {
-    const s = gameReducer(newGameState('CRANE', 0), { type: 'TIMEOUT', now: 300_000 });
+    const started = typeWord(newGameState('CRANE', 0), 'C');
+    const s = gameReducer(started, { type: 'TIMEOUT', now: 300_000 });
     expect(s.status).toBe('lost');
     expect(s.message.text).toBe("Time's up! The word was CRANE");
   });

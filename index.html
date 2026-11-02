@@ -5,11 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="theme-color" content="#6aaa64" />
+    <meta name="theme-color" content="#f0f2f5" />
     <meta name="description" content="Scordle: a timed word-guessing game with scoring." />
     <title>Scordle</title>
     <link rel="icon" type="image/png" href="/img/favicon.png" />
     <link rel="apple-touch-icon" href="/img/apple-touch-icon-180x180.png" />
+    <script>
+      // Set the theme before first paint so dark mode doesn't flash white.
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('scordle.theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

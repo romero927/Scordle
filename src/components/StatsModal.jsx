@@ -24,9 +24,13 @@ export default function StatsModal({ onClose }) {
             {stat('Avg Score', s.avgScore)}
             {stat('Avg Time', `${s.avgTime}s`)}
           </div>
-          <div className="stats-row">{stat('Avg Guesses', s.avgGuesses)}</div>
+          <div className="stats-row">
+            {stat('Best Score', s.bestScore)}
+            {stat('Avg Guesses', s.avgGuesses)}
+          </div>
         </div>
         <h3>Game History</h3>
+        {s.total > 0 && <p className="table-note">Score shows letters + win bonus + time bonus for newer games.</p>}
         {s.total === 0 ? (
           <p>No games played yet.</p>
         ) : (
@@ -51,7 +55,17 @@ export default function StatsModal({ onClose }) {
                       <td>{g.result === 'win' ? 'Win' : 'Loss'}</td>
                       <td>{g.time}</td>
                       <td>{g.guesses}</td>
-                      <td>{g.score}</td>
+                      <td>
+                        {g.score}
+                        {g.letters !== undefined && (
+                          <span
+                            className="score-detail"
+                            title={`Letters ${g.letters}, win bonus ${g.winBonus}, time bonus ${g.timeBonus}`}
+                          >
+                            {g.letters} + {g.winBonus} + {g.timeBonus}
+                          </span>
+                        )}
+                      </td>
                       <td>{g.correctWord}</td>
                       <td>{date.toLocaleDateString()} {date.toLocaleTimeString()}</td>
                     </tr>

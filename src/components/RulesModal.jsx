@@ -4,7 +4,7 @@ export default function RulesModal({ onClose }) {
   return (
     <Modal title="Scoring Rules" onClose={onClose}>
       <div id="scoring-rules-content">
-        <p>Guess the 5-letter word in 6 tries before the 5-minute timer runs out. Scoring works like this:</p>
+        <p>Guess the 5-letter word in 6 tries before the 5-minute timer runs out. The clock starts when you type your first letter. Scoring works like this:</p>
         <ul>
           <li>Correct letter in correct position: (7 - current guess number) × 20 points (only the first time each letter is placed correctly)</li>
           <li>Correct letter in wrong position: (7 - current guess number) × 5 points (only the first time each letter is found)</li>

@@ -10,8 +10,10 @@ export function newGameState(answer, now) {
     current: '',
     status: 'playing', // 'playing' | 'won' | 'lost'
     score: 0,
+    lastPoints: 0, // points from the latest guess, including bonuses
+    breakdown: { letters: 0, win: 0, time: 0 },
     found: { correct: [], present: [] },
-    startTime: now,
+    startTime: null, // the clock starts on the first letter typed
     endTime: null,
     lastGuessAt: null,
     message: { text: '', type: '' },
@@ -26,7 +28,12 @@ export function gameReducer(state, action) {
 
     case 'TYPE':
       if (state.status !== 'playing' || state.current.length >= WORD_LENGTH) return state;
-      return { ...state, current: state.current + action.letter, message: clearError(state.message) };
+      return {
+        ...state,
+        current: state.current + action.letter,
+        startTime: state.startTime ?? action.now,
+        message: clearError(state.message),
+      };
 
     case 'BACKSPACE':
       if (state.status !== 'playing' || !state.current) return state;
@@ -36,7 +43,7 @@ export function gameReducer(state, action) {
       return submit(state, action);
 
     case 'TIMEOUT':
-      if (state.status !== 'playing') return state;
+      if (state.status !== 'playing' || state.startTime === null) return state;
       return {
         ...state,
         status: 'lost',
@@ -72,17 +79,14 @@ function submit(state, { now, isValidWord }) {
   const won = guess === state.answer;
   const lost = !won && guessNumber === MAX_GUESSES;
 
-  let score = state.score + points;
+  const breakdown = { ...state.breakdown, letters: state.breakdown.letters + points };
   let message = { text: '', type: '' };
 
   if (won) {
-    const win = winBonus(guessNumber);
-    const time = timeBonus((now - state.startTime) / 1000);
-    score += win + time;
-    let text = 'Congratulations! You guessed the word!';
-    if (win > 0) text += ` Win bonus: ${win} points!`;
-    if (time > 0) text += ` Time bonus: ${time} points!`;
-    message = { text, type: 'success' };
+    breakdown.win = winBonus(guessNumber);
+    breakdown.time = timeBonus((now - state.startTime) / 1000);
+    const tries = guessNumber === 1 ? '1 guess' : `${guessNumber} guesses`;
+    message = { text: `You got it in ${tries}!`, type: 'success' };
   } else if (lost) {
     message = { text: `Game over! The word was ${state.answer}`, type: 'error' };
   }
@@ -92,7 +96,9 @@ function submit(state, { now, isValidWord }) {
     guesses,
     current: '',
     found,
-    score,
+    score: breakdown.letters + breakdown.win + breakdown.time,
+    lastPoints: breakdown.letters + breakdown.win + breakdown.time - state.score,
+    breakdown,
     status: won ? 'won' : lost ? 'lost' : 'playing',
     endTime: won || lost ? now : null,
     lastGuessAt: now,
